@@ -1,0 +1,11 @@
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\bin\Release\Tools.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\bin\Release\Tools.pdb
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\bin\Release\Models.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\bin\Release\Newtonsoft.Json.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\bin\Release\Models.pdb
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\bin\Release\Newtonsoft.Json.xml
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\obj\Release\Tools.csproj.AssemblyReference.cache
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\obj\Release\Tools.csproj.CoreCompileInputs.cache
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\obj\Release\Tools.csproj.CopyComplete
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\obj\Release\Tools.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Tools\obj\Release\Tools.pdb

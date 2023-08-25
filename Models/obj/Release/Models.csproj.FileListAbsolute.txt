@@ -1,0 +1,6 @@
+D:\projects\C#\MyToaster\WindowsNotifications\Models\bin\Release\Models.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Models\bin\Release\Models.pdb
+D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Release\Models.csproj.AssemblyReference.cache
+D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Release\Models.csproj.CoreCompileInputs.cache
+D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Release\Models.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Release\Models.pdb

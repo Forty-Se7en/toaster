@@ -1,0 +1,6 @@
+D:\projects\C#\MyToaster\WindowsNotifications\Helpers\bin\Debug\Helpers.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Helpers\bin\Debug\Helpers.pdb
+D:\projects\C#\MyToaster\WindowsNotifications\Helpers\obj\Debug\Helpers.csproj.AssemblyReference.cache
+D:\projects\C#\MyToaster\WindowsNotifications\Helpers\obj\Debug\Helpers.csproj.CoreCompileInputs.cache
+D:\projects\C#\MyToaster\WindowsNotifications\Helpers\obj\Debug\Helpers.dll
+D:\projects\C#\MyToaster\WindowsNotifications\Helpers\obj\Debug\Helpers.pdb
