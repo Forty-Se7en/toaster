@@ -1,6 +1,0 @@
-D:\projects\C#\MyToaster\WindowsNotifications\Models\bin\Debug\Models.dll
-D:\projects\C#\MyToaster\WindowsNotifications\Models\bin\Debug\Models.pdb
-D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Debug\Models.csproj.AssemblyReference.cache
-D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Debug\Models.csproj.CoreCompileInputs.cache
-D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Debug\Models.dll
-D:\projects\C#\MyToaster\WindowsNotifications\Models\obj\Debug\Models.pdb

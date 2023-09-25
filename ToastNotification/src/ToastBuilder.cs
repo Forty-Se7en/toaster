@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -87,7 +88,7 @@ namespace Notification
             { toast.Activated += CommandBuilder.BuildCommand(toastData.Command); }
             else
             {
-                toast.Activated += ToastActivatedMock;
+                toast.Activated += ToastActivated;
             }
             toast.Dismissed += ToastDismissedMock;
             toast.Failed += ToastFailed;
@@ -109,7 +110,7 @@ namespace Notification
             { toast.Activated += CommandBuilder.BuildCommand(toastData.Command); }
             else
             {
-                toast.Activated += ToastActivatedMock;
+                toast.Activated += ToastActivated;
             }
             toast.Dismissed += ToastDismissedMock;
             toast.Failed += ToastFailed;
@@ -150,9 +151,29 @@ namespace Notification
                 {
                     toastBuilder.AddHeroImage(toastData.Image);
                 }
+                if (toastData.Input != null)
+                {
+                    toastBuilder.AddInput(toastData.Input.Id, toastData.Input.Type, toastData.Input.Content, toastData.Input.DefaultInput, toastData.Input.Values);
+                }
+                if (toastData.Button != null)
+                {
+                    //string arg = $"type={}&amp;data={}";
+                    toastBuilder.AddButton(toastData.Button.Caption, toastData.Button.Command.Data, toastData.Button.Image, toastData.Button.LinkedId);
+                }
+                if (toastData.Buttons != null)
+                {
+                    foreach (var button in toastData.Buttons)
+                    {
+                        toastBuilder.AddButton(button.Caption, button.Command.Data, button.Image, button.LinkedId);
+                    }
+                    //string arg = $"type={}&amp;data={}";
+                    //toastBuilder.AddButton(toastData.Button.Caption, toastData.Button.Command.Data, toastData.Button.Image);
+                }
                 toastData.Xml = toastBuilder.ToXml();
             }
 
+            Console.WriteLine("XML:\n");
+            Console.WriteLine(toastData.Xml);
             XmlDocument toastXml = new XmlDocument();
             toastXml.LoadXml(toastData.Xml);
 
@@ -164,7 +185,7 @@ namespace Notification
             }
             else
             {
-                toast.Activated += ToastActivatedMock;
+                toast.Activated += ToastActivated;
             }
             //toast.Dismissed += ToastDismissedMock;
             toast.Failed += ToastFailed;
@@ -303,7 +324,7 @@ namespace Notification
             { toast.Activated += CommandBuilder.BuildCommand(toastData.Command); }
             else
             {
-                toast.Activated += ToastActivatedMock;
+                toast.Activated += ToastActivated;
             }
             toast.Dismissed += ToastDismissedMock;
             toast.Failed += ToastFailed;
@@ -401,10 +422,17 @@ namespace Notification
         }
 
 
-        private static void ToastActivatedMock(ToastNotification sender, object e)
+        private static void ToastActivated(ToastNotification sender, object e)
         {
             Console.WriteLine("Toast Activated");
-            
+            var args = e as ToastActivatedEventArgs;
+            if (args == null) return;
+            foreach(var input in args.UserInput)
+            {
+                Console.WriteLine(input.Key.ToString() +" : "+ input.Value.ToString());
+            }
+            String separator = "&amp;";
+            string[] tokens = args.Arguments.Split(new[] {separator }, StringSplitOptions.None);
             //Environment.Exit(0);
         }
 

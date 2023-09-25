@@ -1,6 +1,0 @@
-D:\projects\C#\MyToaster\WindowsNotifications\Listener\bin\Debug\Listener.dll
-D:\projects\C#\MyToaster\WindowsNotifications\Listener\bin\Debug\Listener.pdb
-D:\projects\C#\MyToaster\WindowsNotifications\Listener\obj\Debug\Listener.csproj.AssemblyReference.cache
-D:\projects\C#\MyToaster\WindowsNotifications\Listener\obj\Debug\Listener.csproj.CoreCompileInputs.cache
-D:\projects\C#\MyToaster\WindowsNotifications\Listener\obj\Debug\Listener.dll
-D:\projects\C#\MyToaster\WindowsNotifications\Listener\obj\Debug\Listener.pdb

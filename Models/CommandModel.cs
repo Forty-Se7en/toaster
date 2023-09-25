@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Notification.Models
 {
-    public class CommandModel
+    public class CommandModel: ICloneable
     {
         public string Type { get; set; }
         public string Data { get; set; }
 
-        public CommandModel Clone()
+        //public CommandModel Clone()
+        //{
+        //    return new CommandModel { Type = Type, Data = Data };
+        //}
+
+        public object Clone()
         {
-            return new CommandModel { Type = Type, Data = Data };
+            return this.MemberwiseClone();
         }
     }
 

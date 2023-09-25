@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.UI.Composition;
+
 
 namespace Notification
 {
@@ -21,32 +18,39 @@ namespace Notification
 
         readonly List<XmlObject> _actions = new List<XmlObject>();
 
-        public void AddHeader(String text)
+        public void AddHeader(string text)
         {
-            _visual.Insert(0, new TextObject(text, _textIdIndex++));
+            _visual.Insert(0, new TextObject(text, _textIdIndex++.ToString()));
         }
 
         public void AddText(String text)
         {
-            _visual.Add(new TextObject(text, _textIdIndex++));
+            _visual.Add(new TextObject(text, _textIdIndex++.ToString()));
         }
 
         public void AddLogo(String logo)
         {
-            _logo = new ImageObject(logo, 0, type: ImageType.logo);
+            _logo = new ImageObject(logo, 0.ToString(), type: ImageType.logo);
         }
 
         public void AddHeroImage(String image)
         {
-            _heroImage = new ImageObject(image, 1, type: ImageType.hero);
+            _heroImage = new ImageObject(image, 1.ToString(), type: ImageType.hero);
         }
 
         public void AddImage(String image)
         {
-            _visual.Add(new ImageObject(image, _imageIdIndex++));
+            _visual.Add(new ImageObject(image, _imageIdIndex++.ToString()));
         }
 
-        //void addButton(String caption, String action) {}
+        public void AddButton(string caption, string data, string image = null, string linkedId = null) {
+            _actions.Add(new ButtonObject(_buttonIdIndex++.ToString(), caption, data, image, linkedId));
+        }
+
+        public void AddInput(string id, string type, string content = null, string defaultInput = null, string[] values = null)
+        {
+            _actions.Add(new InputObject(id, type, content, defaultInput, values));
+        }
 
         public void SetSilent(bool silent)
         {
@@ -80,66 +84,21 @@ namespace Notification
             xml += $"<audio silent=\"{_silent}\"/>\n";
 
             // actions
+            if (_actions.Count > 0)
+            {
+                xml += "<actions>\n";
+                foreach (var action in _actions)
+                {
+                    xml += action.ToXml();
+                }
+                xml += "</actions>\n";
+            }
 
             xml += "</toast>\n";
             return xml;
         }
     }
 
-    abstract class XmlObject
-    {
-        protected readonly int _id;
-
-        protected XmlObject(int id) { this._id = id; }
-
-        public abstract String ToXml();
-        
-        public override String ToString()
-        {
-            return ToXml();
-        }
-    }
-
-    abstract class VisualObject: XmlObject
-    {
-        protected String _data;
-
-        protected VisualObject(String data, int id) : base(id)
-        {
-            _data = data;
-        }
-    }
-
-    class TextObject : VisualObject
-    {
-        public TextObject(string data, int id) : base(data, id) { }
-
-        public override String ToXml() {
-            return $"<text id=\"{_id}\">{_data}</text>\n";
-        }
-    }
-
-    class ImageObject: VisualObject
-    {
-        ImageType _type;
-        public ImageObject(string data, int id, ImageType type = ImageType.none) : base(data, id) 
-        { 
-            this._type = type;
-        }
-        
-      public override String ToXml() {
-            switch (_type)
-            {
-                case ImageType.logo:
-                    return $"<image src=\"{_data}\" placement=\"appLogoOverride\" hint-crop=\"circle\" id=\"{_id}\"/>\n";
-                case ImageType.hero:
-                    return $"<image src=\"{_data}\" placement=\"hero\" id=\"{_id}\"/>\n";
-                default:
-                    return $"<image src=\"{_data}\" id=\"{_id}\"/>\n";
-            }
-        }
-    }
-
-    enum ImageType { none, logo, hero }
+    
 
 }

@@ -1,4 +1,7 @@
-﻿namespace Notification.Models
+﻿
+using Models;
+
+namespace Notification.Models
 {
     public class ToastModel
     {
@@ -24,6 +27,12 @@
 
         public CommandModel OnClick { get; set; }
 
+        public ButtonModel Button { get; set; }
+
+        public ButtonModel[] Buttons { get; set; }
+
+        public InputModel Input { get; set; }
+
         public ToastModel Clone()
         {
             return new ToastModel
@@ -39,8 +48,11 @@
                 HeroImage = HeroImage,
                 Sound = Sound,
                 Xml = Xml,
-                Command = Command?.Clone(),
-                OnClick = OnClick?.Clone()
+                Command = (CommandModel)Command?.Clone(),
+                OnClick = (CommandModel)OnClick?.Clone(),
+                Button = (ButtonModel)Button?.Clone(),
+                Buttons = (ButtonModel[])Buttons?.Clone(),
+                Input = (InputModel)Input?.Clone(),
             };
         }
     }
