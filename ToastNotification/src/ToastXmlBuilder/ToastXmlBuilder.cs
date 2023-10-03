@@ -43,8 +43,8 @@ namespace Notification
             _visual.Add(new ImageObject(image, _imageIdIndex++.ToString()));
         }
 
-        public void AddButton(string caption, string data, string image = null, string linkedId = null) {
-            _actions.Add(new ButtonObject(_buttonIdIndex++.ToString(), caption, data, image, linkedId));
+        public void AddButton(string caption, string command, string image = null, string linkedId = null) {
+            _actions.Add(new ButtonObject(_buttonIdIndex++.ToString(), caption, command, image, linkedId));
         }
 
         public void AddInput(string id, string type, string content = null, string defaultInput = null, string[] values = null)

@@ -72,22 +72,22 @@ namespace Notification
     {
         CommandType _type;
         string _caption;
-        string _data;
+        string _command;
         string _image;
         string _linkedId;
 
-        public ButtonObject(string id, string caption, string data, string image = null, string linkedId = null) : base(id)
+        public ButtonObject(string id, string caption, string command, string image = null, string linkedId = null) : base(id)
         {
             this._caption = caption;
             //this._type = type;
-            this._data = data;
+            this._command = command;
             this._image = image;
             this._linkedId = linkedId;
         }
 
         public override string ToXml()
         {
-            string xml = $"<action content=\"{_caption}\" arguments=\"{_data}\" ";
+            string xml = $"<action content=\"{_caption}\" arguments=\"{_command}\" ";
             if (_image != null)
             {
                 xml += $"imageUri=\"{_image}\" ";

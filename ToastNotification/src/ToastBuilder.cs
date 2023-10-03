@@ -1,12 +1,17 @@
-﻿using Notification.Models;
+﻿using Newtonsoft.Json;
+using Notification.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Mime;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
@@ -19,7 +24,9 @@ namespace Notification
         //private const String APP_ID = "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe";
         //private static String APP_ID = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "\\WindowsPowerShell\\v1.0\\powershell.exe");
         private static String APP_ID = "toaster";
-        
+
+        private static readonly string Separator = "&amp;";
+
         public static Windows.UI.Notifications.ToastNotification ShowToastFromTemplate(ToastModel toastData)
         {
             //if (toastData.Message == null) return null;
@@ -155,16 +162,27 @@ namespace Notification
                 {
                     toastBuilder.AddInput(toastData.Input.Id, toastData.Input.Type, toastData.Input.Content, toastData.Input.DefaultInput, toastData.Input.Values);
                 }
+                if (toastData.Inputs != null)
+                {
+                    foreach (var input in toastData.Inputs)
+                    {
+                        toastBuilder.AddInput(input.Id, input.Type, input.Content, input.DefaultInput, input.Values);
+                    }
+                    //string arg = $"type={}&amp;data={}";
+                    //toastBuilder.AddButton(toastData.Button.Caption, toastData.Button.Command.Data, toastData.Button.Image);
+                }
                 if (toastData.Button != null)
                 {
                     //string arg = $"type={}&amp;data={}";
-                    toastBuilder.AddButton(toastData.Button.Caption, toastData.Button.Command.Data, toastData.Button.Image, toastData.Button.LinkedId);
+                    string command = CommandToArgs(toastData.Button.Command);
+                    toastBuilder.AddButton(toastData.Button.Caption, command, toastData.Button.Image, toastData.Button.LinkedId);
                 }
                 if (toastData.Buttons != null)
                 {
                     foreach (var button in toastData.Buttons)
                     {
-                        toastBuilder.AddButton(button.Caption, button.Command.Data, button.Image, button.LinkedId);
+                        string command = CommandToArgs(button.Command);
+                        toastBuilder.AddButton(button.Caption, command, button.Image, button.LinkedId);
                     }
                     //string arg = $"type={}&amp;data={}";
                     //toastBuilder.AddButton(toastData.Button.Caption, toastData.Button.Command.Data, toastData.Button.Image);
@@ -425,14 +443,182 @@ namespace Notification
         private static void ToastActivated(ToastNotification sender, object e)
         {
             Console.WriteLine("Toast Activated");
-            var args = e as ToastActivatedEventArgs;
-            if (args == null) return;
-            foreach(var input in args.UserInput)
+            var toasterArgs = e as ToastActivatedEventArgs;
+            if (toasterArgs == null) { Console.WriteLine("toast arguments are null"); return; }
+
+            string arguments = toasterArgs.Arguments;
+            var inputs = toasterArgs.UserInput;
+            //var uri = new Uri(arguments);
+            
+
+            var type = HttpUtility.ParseQueryString(arguments).Get("type");
+            if (type == null)
             {
-                Console.WriteLine(input.Key.ToString() +" : "+ input.Value.ToString());
+                Console.WriteLine("toast type is null");
+                return;
             }
-            String separator = "&amp;";
-            string[] tokens = args.Arguments.Split(new[] {separator }, StringSplitOptions.None);
+            var sourceId = HttpUtility.ParseQueryString(arguments).Get("sourceId[]")?.Split(',');
+            dynamic data;
+
+            switch (type)
+            {
+                case "openLink":
+                    var link = HttpUtility.ParseQueryString(arguments).Get("link");                    
+                    if (string.IsNullOrEmpty(link)) { Console.WriteLine("Open link error: link invalid value"); return; }
+                    if (sourceId!=null && sourceId.Length>0)
+                    {
+                        foreach (var id in sourceId)
+                        {
+                            dynamic value;
+                            var result = inputs.TryGetValue(id, out value);
+                            if (result)
+                            {
+                                if (!link.EndsWith("/"))
+                                {
+                                    link += "/";
+                                }
+                                link += $"{id}/{value}";
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Open link warning: failed get value from input id \"{id}\"");
+                            }
+                        }
+                    }
+                    CommandBuilder.OpenLink(link);
+                    break;
+                case "runApp":
+                    var appPath = HttpUtility.ParseQueryString(arguments).Get("appPath");
+                    if (string.IsNullOrEmpty(appPath)) { Console.WriteLine("Run app error: app path invalid value"); return; }
+                    if (sourceId != null && sourceId.Length > 0)
+                    {
+                        List<string> values = new List<string>();
+                        foreach (var id in sourceId)
+                        {
+                            dynamic value;
+                            var result = inputs.TryGetValue(id, out value);
+                            if (result)
+                            {
+                                values.Add(value);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Run app warning: failed get value from input id \"{id}\"");
+                            }
+                        }
+                        CommandBuilder.RunApp(appPath);
+                    }
+                    else { CommandBuilder.RunApp(appPath); }
+
+
+                    break;
+                case "package":
+                    var protocol = HttpUtility.ParseQueryString(arguments).Get("protocol");
+                    if (string.IsNullOrEmpty(protocol))
+                    {
+                        Console.WriteLine("rest command error: protocol invalid value");
+                        return;
+                    }
+                    var ip = HttpUtility.ParseQueryString(arguments).Get("ip");
+                    if (string.IsNullOrEmpty(ip))
+                    {
+                        Console.WriteLine("rest command error: ip invalid value");
+                        return;
+                    }
+                    var port = HttpUtility.ParseQueryString(arguments).Get("port");
+                    if (string.IsNullOrEmpty(port))
+                    {
+                        Console.WriteLine("rest command error: port invalid value");
+                        return;
+                    }
+                    data = HttpUtility.ParseQueryString(arguments).Get("data");
+                    break;
+                case "rest":
+                    var baseUrl = HttpUtility.ParseQueryString(arguments).Get("baseUrl");
+                    if (string.IsNullOrEmpty(baseUrl))
+                    {
+                        Console.WriteLine("rest command error: baseUrl invalid value");
+                        return;
+                    }
+                    var request = HttpUtility.ParseQueryString(arguments).Get("request");
+                    if (string.IsNullOrEmpty(request))
+                    {
+                        Console.WriteLine("rest command error: request invalid value");
+                        return;
+                    }
+
+
+                    HttpClient client = new HttpClient();
+                    client.BaseAddress = new Uri(baseUrl);
+                    client.Timeout = TimeSpan.FromSeconds(5);
+
+                    switch (request)
+                    {
+                        case "get":
+                            client.GetAsync(baseUrl).ContinueWith((a) => { Console.WriteLine($"get result: {a.Result.StatusCode}"); });
+
+                            break;
+                        case "post":
+                            StringContent content = null;
+                            data = HttpUtility.ParseQueryString(arguments).Get("data");
+                            if (data!=null)
+                            {
+                                content = new StringContent(data, Encoding.UTF8);
+                            }
+                            else if (sourceId!=null && sourceId.Length > 0)
+                            {
+                                    string json = "{\n";
+                                foreach (var id in sourceId)
+                                {
+                                    dynamic value;
+                                    var result = inputs.TryGetValue(id, out value);
+                                    if (result)
+                                    {
+                                        
+                                        json += $"\"{id}\": \"{value}\"\n";
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"rest command warning: failed get value from input id \"{id}\"");
+                                    }
+                                }
+                                json += "}";
+                                content = new StringContent(json, Encoding.UTF8);
+                            }
+                            if (content == null)
+                            {
+                                Console.WriteLine($"rest command error: content for post request is null");
+                                return;
+                            }
+                            client.PostAsync(baseUrl, content);
+
+                            //HttpRequestMessage requestMessage = new HttpRequestMessage()
+                            //{
+                            //    Content = content,
+                            //    Method = HttpMethod.Post,
+                            //    RequestUri = new Uri(baseUrl)
+                            //};
+
+                            //client.SendAsync(requestMessage);
+                            
+                            break;
+                        case "put": break;
+                        case "delete": break;
+                        default: Console.WriteLine($"request command error: unknown type of request: \"{request}\"");break;
+                    }
+
+                    
+                    break;
+            }
+            
+            
+
+            foreach (var input in toasterArgs.UserInput)
+            {
+                Console.WriteLine(input.Key.ToString() + " : " + input.Value.ToString());
+            }
+            
+            string[] tokens = toasterArgs.Arguments.Split(new[] {Separator }, StringSplitOptions.None);
             //Environment.Exit(0);
         }
 
@@ -463,6 +649,63 @@ namespace Notification
         {
             Console.WriteLine("Toast Error");
             //Environment.Exit(-1);
+        }
+
+        static string CommandToArgs(CommandModel command)
+        {
+            //List<string> result = new List<string>();
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append($"type={command.Type}");
+            switch (command.Type) {
+                case "openLink":
+                    stringBuilder.Append($"{Separator}link={command.Link}");
+                    if (command.Data != null) { stringBuilder.Append($"{Separator}data={command.Data}"); }
+                    if (command.SourceId != null && command.SourceId.Length > 0)
+                    {
+                        foreach (var source in command.SourceId)
+                        {
+                            stringBuilder.Append($"{Separator}sourceId[]={source}");
+                        }
+                    }
+                    break;
+                case "runApp":
+                    stringBuilder.Append($"{Separator}appPath={command.AppPath}");
+                    if (command.Data != null) { stringBuilder.Append($"{Separator}data={command.Data}"); }
+                    if (command.SourceId != null && command.SourceId.Length > 0)
+                    {
+                        foreach (var source in command.SourceId)
+                        {
+                            stringBuilder.Append($"{Separator}sourceId[]={source}");
+                        }
+                    }
+                    break;
+                case "package":
+                    stringBuilder.Append($"{Separator}protocol={command.Protocol}");
+                    stringBuilder.Append($"{Separator}ip={command.Ip}");
+                    stringBuilder.Append($"{Separator}port={command.Port}");
+                    if (command.Data != null) { stringBuilder.Append($"{Separator}data={command.Data}"); }
+                    if (command.SourceId !=null &&  command.SourceId.Length > 0)
+                    {
+                        foreach(var source in command.SourceId)
+                        {
+                            stringBuilder.Append($"{Separator}sourceId[]={source}");
+                        }
+                    }
+                    break;
+                case "rest":
+                    stringBuilder.Append($"{Separator}baseUrl={command.BaseUrl}");
+                    stringBuilder.Append($"{Separator}request={command.Request}");
+                    if (command.Data != null) { stringBuilder.Append($"{Separator}data={command.Data}"); }
+                    if (command.SourceId != null && command.SourceId.Length > 0)
+                    {
+                        foreach (var source in command.SourceId)
+                        {
+                            stringBuilder.Append($"{Separator}sourceId[]={source}");
+                        }
+                    }
+                    break;
+            }
+            return stringBuilder.ToString();
         }
     }
 }

@@ -6,6 +6,8 @@ using Notification.Models;
 using System.Threading;
 using Listener;
 using ToastHelpers;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Notification
 {
@@ -14,7 +16,7 @@ namespace Notification
         private const int START_PORT = 11000;
         private const int END_PORT = 11050;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             #region comment
             /*
@@ -72,6 +74,12 @@ namespace Notification
 
             #endregion
 
+            /*HttpClient client = new HttpClient();
+            var baseUrl = "http://localhost:4000/update";
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(5);
+            await client.GetAsync(baseUrl);
+            */
             FromPort(args);
         }
 

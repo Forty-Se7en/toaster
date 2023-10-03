@@ -33,6 +33,8 @@ namespace Notification.Models
 
         public InputModel Input { get; set; }
 
+        public InputModel[] Inputs { get; set; }
+
         public ToastModel Clone()
         {
             return new ToastModel
@@ -53,6 +55,7 @@ namespace Notification.Models
                 Button = (ButtonModel)Button?.Clone(),
                 Buttons = (ButtonModel[])Buttons?.Clone(),
                 Input = (InputModel)Input?.Clone(),
+                Inputs = (InputModel[])Inputs?.Clone(),
             };
         }
     }
