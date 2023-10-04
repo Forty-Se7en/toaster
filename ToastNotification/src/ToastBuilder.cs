@@ -447,9 +447,7 @@ namespace Notification
             if (toasterArgs == null) { Console.WriteLine("toast arguments are null"); return; }
 
             string arguments = toasterArgs.Arguments;
-            var inputs = toasterArgs.UserInput;
-            //var uri = new Uri(arguments);
-            
+            var inputs = toasterArgs.UserInput;         
 
             var type = HttpUtility.ParseQueryString(arguments).Get("type");
             if (type == null)
@@ -457,168 +455,23 @@ namespace Notification
                 Console.WriteLine("toast type is null");
                 return;
             }
-            var sourceId = HttpUtility.ParseQueryString(arguments).Get("sourceId[]")?.Split(',');
-            dynamic data;
 
             switch (type)
             {
                 case "openLink":
-                    var link = HttpUtility.ParseQueryString(arguments).Get("link");                    
-                    if (string.IsNullOrEmpty(link)) { Console.WriteLine("Open link error: link invalid value"); return; }
-                    if (sourceId!=null && sourceId.Length>0)
-                    {
-                        foreach (var id in sourceId)
-                        {
-                            dynamic value;
-                            var result = inputs.TryGetValue(id, out value);
-                            if (result)
-                            {
-                                if (!link.EndsWith("/"))
-                                {
-                                    link += "/";
-                                }
-                                link += $"{id}/{value}";
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Open link warning: failed get value from input id \"{id}\"");
-                            }
-                        }
-                    }
-                    CommandBuilder.OpenLink(link);
+                    CommandBuilder.ParseOpenLinkCommand(arguments, inputs);
                     break;
                 case "runApp":
-                    var appPath = HttpUtility.ParseQueryString(arguments).Get("appPath");
-                    if (string.IsNullOrEmpty(appPath)) { Console.WriteLine("Run app error: app path invalid value"); return; }
-                    if (sourceId != null && sourceId.Length > 0)
-                    {
-                        List<string> values = new List<string>();
-                        foreach (var id in sourceId)
-                        {
-                            dynamic value;
-                            var result = inputs.TryGetValue(id, out value);
-                            if (result)
-                            {
-                                values.Add(value);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Run app warning: failed get value from input id \"{id}\"");
-                            }
-                        }
-                        CommandBuilder.RunApp(appPath);
-                    }
-                    else { CommandBuilder.RunApp(appPath); }
-
-
+                    CommandBuilder.ParseRunAppCommand(arguments, inputs);
                     break;
                 case "package":
-                    var protocol = HttpUtility.ParseQueryString(arguments).Get("protocol");
-                    if (string.IsNullOrEmpty(protocol))
-                    {
-                        Console.WriteLine("rest command error: protocol invalid value");
-                        return;
-                    }
-                    var ip = HttpUtility.ParseQueryString(arguments).Get("ip");
-                    if (string.IsNullOrEmpty(ip))
-                    {
-                        Console.WriteLine("rest command error: ip invalid value");
-                        return;
-                    }
-                    var port = HttpUtility.ParseQueryString(arguments).Get("port");
-                    if (string.IsNullOrEmpty(port))
-                    {
-                        Console.WriteLine("rest command error: port invalid value");
-                        return;
-                    }
-                    data = HttpUtility.ParseQueryString(arguments).Get("data");
+                    CommandBuilder.ParseSendPackageCommand(arguments, inputs);
                     break;
                 case "rest":
-                    var baseUrl = HttpUtility.ParseQueryString(arguments).Get("baseUrl");
-                    if (string.IsNullOrEmpty(baseUrl))
-                    {
-                        Console.WriteLine("rest command error: baseUrl invalid value");
-                        return;
-                    }
-                    var request = HttpUtility.ParseQueryString(arguments).Get("request");
-                    if (string.IsNullOrEmpty(request))
-                    {
-                        Console.WriteLine("rest command error: request invalid value");
-                        return;
-                    }
-
-
-                    HttpClient client = new HttpClient();
-                    client.BaseAddress = new Uri(baseUrl);
-                    client.Timeout = TimeSpan.FromSeconds(5);
-
-                    switch (request)
-                    {
-                        case "get":
-                            client.GetAsync(baseUrl).ContinueWith((a) => { Console.WriteLine($"get result: {a.Result.StatusCode}"); });
-
-                            break;
-                        case "post":
-                            StringContent content = null;
-                            data = HttpUtility.ParseQueryString(arguments).Get("data");
-                            if (data!=null)
-                            {
-                                content = new StringContent(data, Encoding.UTF8);
-                            }
-                            else if (sourceId!=null && sourceId.Length > 0)
-                            {
-                                    string json = "{\n";
-                                foreach (var id in sourceId)
-                                {
-                                    dynamic value;
-                                    var result = inputs.TryGetValue(id, out value);
-                                    if (result)
-                                    {
-                                        
-                                        json += $"\"{id}\": \"{value}\"\n";
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine($"rest command warning: failed get value from input id \"{id}\"");
-                                    }
-                                }
-                                json += "}";
-                                content = new StringContent(json, Encoding.UTF8);
-                            }
-                            if (content == null)
-                            {
-                                Console.WriteLine($"rest command error: content for post request is null");
-                                return;
-                            }
-                            client.PostAsync(baseUrl, content);
-
-                            //HttpRequestMessage requestMessage = new HttpRequestMessage()
-                            //{
-                            //    Content = content,
-                            //    Method = HttpMethod.Post,
-                            //    RequestUri = new Uri(baseUrl)
-                            //};
-
-                            //client.SendAsync(requestMessage);
-                            
-                            break;
-                        case "put": break;
-                        case "delete": break;
-                        default: Console.WriteLine($"request command error: unknown type of request: \"{request}\"");break;
-                    }
-
-                    
+                    CommandBuilder.ParseRestCommand(arguments, inputs);                    
                     break;
-            }
-            
-            
+            }            
 
-            foreach (var input in toasterArgs.UserInput)
-            {
-                Console.WriteLine(input.Key.ToString() + " : " + input.Value.ToString());
-            }
-            
-            string[] tokens = toasterArgs.Arguments.Split(new[] {Separator }, StringSplitOptions.None);
             //Environment.Exit(0);
         }
 
