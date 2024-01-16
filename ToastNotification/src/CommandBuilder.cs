@@ -22,12 +22,13 @@ namespace Notification
         {            
             switch (commandModel.Type)
             {
-                case "link": return (s, e) => {
+                case "openLink": return (s, e) => {
                     OpenLink(commandModel.Data);
                 };
 
                 default: return (s, e) => { Console.WriteLine("Unknown command type"); };
             }
+
         }
 
         public static void OpenLink(string link) {

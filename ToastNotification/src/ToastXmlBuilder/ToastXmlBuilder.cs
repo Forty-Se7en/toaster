@@ -14,6 +14,8 @@ namespace Notification
         int _imageIdIndex = 2;
         int _buttonIdIndex = 0;
 
+        string _launchCommand = null;
+
         readonly List<XmlObject> _visual = new List<XmlObject>();
 
         readonly List<XmlObject> _actions = new List<XmlObject>();
@@ -57,12 +59,18 @@ namespace Notification
             _silent = silent;
         }
 
+        public void SetOnClickCommand(string command)
+        {
+            _launchCommand = command;
+        }
+
         public String ToXml()
         {
             String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-            xml += "<toast activationType=\"background\">\n";
+            xml += $"<toast activationType=\"foreground\"{(_launchCommand == null ? "" : $" launch =\"{_launchCommand}\"")}>\n";
 
             // visual
+            
             xml += "<visual>\n";
             xml += "<binding template=\"ToastGeneric\">\n";
             if (_logo != null)

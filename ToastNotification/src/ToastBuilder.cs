@@ -12,8 +12,14 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.UI.WebControls;
+using System.Web.UI;
 using Windows.Data.Xml.Dom;
+using Windows.UI.Composition;
 using Windows.UI.Notifications;
+using static System.Collections.Specialized.BitVector32;
+using static System.Net.Mime.MediaTypeNames;
+using Windows.UI.Popups;
 
 namespace Notification
 {
@@ -187,19 +193,30 @@ namespace Notification
                     //string arg = $"type={}&amp;data={}";
                     //toastBuilder.AddButton(toastData.Button.Caption, toastData.Button.Command.Data, toastData.Button.Image);
                 }
+                if (toastData.OnClick != null)
+                {
+                    string command = CommandToArgs(toastData.OnClick);
+                    toastBuilder.SetOnClickCommand(command);
+                }
                 toastData.Xml = toastBuilder.ToXml();
             }
-
             Console.WriteLine("XML:\n");
             Console.WriteLine(toastData.Xml);
+
+            //string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<toast launch=\"type=openLink&amp;link=www.google.com\" activationType=\"foreground\">\n<visual>\n<binding template=\"ToastGeneric\">\n<image src=\"D:\\img\\картинки тест\\rad.jpg\" placement=\"appLogoOverride\" hint-crop=\"circle\" id=\"0\"/>\n<text id=\"0\">title</text>\n<text id=\"1\">message</text>\n</binding>\n</visual>\n<audio silent=\"False\"/>\n<actions>\n<input id=\"text\" type=\"text\" />\n<action content=\"Send answer\" arguments=\"type=openLink&amp;link=storageup://chat/555&amp;sourceId[]=text\" />\n</actions>\n</toast>\n";
+            //toastData.Xml = xml;
+
+            //Console.WriteLine("XML:\n");
+            //Console.WriteLine(toastData.Xml);
             XmlDocument toastXml = new XmlDocument();
             toastXml.LoadXml(toastData.Xml);
 
             ToastNotification toast = new ToastNotification(toastXml);
             if (toastData.OnClick != null)
             {
-                toast.Activated += CommandBuilder.BuildCommand(toastData.OnClick);
+                //toast.Activated += CommandBuilder.BuildCommand(toastData.OnClick);
                 //toast.Dismissed += (o, e) => { (CommandBuilder.BuildCommand(toastData.OnClick)).Invoke(o,e); };
+                toast.Activated += ToastActivated;
             }
             else
             {
