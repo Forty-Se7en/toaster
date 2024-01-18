@@ -17,10 +17,10 @@ namespace Notification
     internal class Program
     {
         private const int DEFAULT_START_PORT = 11000;
-        private const int DEFAULT_END_PORT = 11050;
+        private const int DEFAULT_END_PORT = 11010;
 
-        private const int CORP_START_PORT = 11100;
-        private const int CORP_END_PORT = 11150;
+        private const int CORP_START_PORT = 12000;
+        private const int CORP_END_PORT = 12010;
 
         private static int StartPort = DEFAULT_START_PORT;
         private static int EndPort = DEFAULT_END_PORT;
