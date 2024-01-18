@@ -20,6 +20,8 @@ namespace Listener
 
         public UDPListener(int startPort, int endPort)
         {
+            //Console.WriteLine($"start port: {startPort}");
+            //Console.WriteLine($"end port: {endPort}");
             for (int i = startPort; i <= endPort; i++) { 
                 try
                 {
@@ -45,7 +47,7 @@ namespace Listener
             {
                 while (true)
                 {
-                    Console.WriteLine("StartListen: Waiting for broadcast");
+                    Console.WriteLine($"StartListen at port {ListenPort}: Waiting for broadcast");
                     byte[] bytes = _listener.Receive(ref _groupEP);
 
                     new Thread(() =>

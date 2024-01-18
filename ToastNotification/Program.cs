@@ -1,4 +1,7 @@
-﻿using System;
+﻿//#define DEFAULT
+//#define CORP
+
+using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -13,11 +16,31 @@ namespace Notification
 {
     internal class Program
     {
-        private const int START_PORT = 11000;
-        private const int END_PORT = 11050;
+        private const int DEFAULT_START_PORT = 11000;
+        private const int DEFAULT_END_PORT = 11050;
+
+        private const int CORP_START_PORT = 11100;
+        private const int CORP_END_PORT = 11150;
+
+        private static int StartPort = DEFAULT_START_PORT;
+        private static int EndPort = DEFAULT_END_PORT;
 
         static async Task Main(string[] args)
         {
+            StartPort = CORP_START_PORT;
+            EndPort = CORP_END_PORT;
+#if DEFAULT
+Console.WriteLine("DEFAULT version");
+StartPort=DEFAULT_START_PORT;
+EndPort=DEFAULT_END_PORT;
+#elif CORP
+Console.WriteLine("CORP version");
+StartPort=CORP_START_PORT;
+EndPort=CORP_END_PORT;
+#else
+            Console.WriteLine("Unknown version");
+#endif
+
             #region comment
             /*
             Tools.HideConsoleWindow();
@@ -138,7 +161,7 @@ namespace Notification
 
         static void StartListen()
         {
-            var listener = new UDPListener(START_PORT, END_PORT);
+            var listener = new UDPListener(StartPort, EndPort);
             listener.Received += (bytes) =>
                 {
                     try
