@@ -32,12 +32,13 @@ namespace Listener
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine("UDP LISTENER SocketException: " + ex);
+                    Console.WriteLine($"UDPListener SocketException at port {i}: " + ex.Message);
                 }
                 catch  (Exception ex)
                 {
-                    Console.WriteLine("UDP LISTENER exception: " + ex);
+                    Console.WriteLine("UDPListener exception: " + ex);
                 }
+                Console.WriteLine();
             }
         }
 
