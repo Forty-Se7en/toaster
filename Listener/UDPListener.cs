@@ -32,12 +32,13 @@ namespace Listener
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine("UDP LISTENER SocketException: " + ex);
+                    Console.WriteLine($"UDPListener SocketException at port {i}: " + ex.Message);
                 }
                 catch  (Exception ex)
                 {
-                    Console.WriteLine("UDP LISTENER exception: " + ex);
+                    Console.WriteLine("UDPListener exception: " + ex);
                 }
+                Console.WriteLine();
             }
         }
 
@@ -47,15 +48,14 @@ namespace Listener
             {
                 while (true)
                 {
-                    Console.WriteLine($"StartListen at port {ListenPort}: Waiting for broadcast");
+                    Console.WriteLine($"StartListen: listening at port {ListenPort}: Waiting for broadcast");
                     byte[] bytes = _listener.Receive(ref _groupEP);
 
                     new Thread(() =>
                     {
                         Thread.CurrentThread.IsBackground = true;
                         Received(bytes);
-                    }).Start();                    
-
+                    }).Start(); 
                     Console.WriteLine($"StartListen: Received broadcast from {_groupEP} : {bytes.Length} bytes");
                 }
             }

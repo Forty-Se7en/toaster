@@ -16,6 +16,8 @@ namespace Notification
 {
     internal class Program
     {
+        private static Mutex _mutex = null;
+
         private const int DEFAULT_START_PORT = 11000;
         private const int DEFAULT_END_PORT = 11010;
 
@@ -25,23 +27,30 @@ namespace Notification
         private static int StartPort = DEFAULT_START_PORT;
         private static int EndPort = DEFAULT_END_PORT;
 
+        private const string DEFAULT_APP_NAME = "toaster";
+        private const string CORP_APP_NAME = "toaster_corp";
+        private static string AppName = null;
+
         static async Task Main(string[] args)
         {
             StartPort = CORP_START_PORT;
             EndPort = CORP_END_PORT;
 #if DEFAULT
 Console.WriteLine("DEFAULT version");
-StartPort=DEFAULT_START_PORT;
-EndPort=DEFAULT_END_PORT;
+StartPort = DEFAULT_START_PORT;
+EndPort = DEFAULT_END_PORT;
+AppName = DEFAULT_APP_NAME;
 #elif CORP
 Console.WriteLine("CORP version");
-StartPort=CORP_START_PORT;
-EndPort=CORP_END_PORT;
+StartPort = CORP_START_PORT;
+EndPort = CORP_END_PORT;
+AppName = CORP_APP_NAME;
 #else
             Console.WriteLine("Unknown version");
 #endif
 
             #region comment
+
             /*
             Tools.HideConsoleWindow();
 
@@ -95,14 +104,21 @@ EndPort=CORP_END_PORT;
             //FromXml();
             //Registrator.RegisterSelf();
 
-            #endregion
-
             /*HttpClient client = new HttpClient();
             var baseUrl = "http://localhost:4000/update";
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(5);
             await client.GetAsync(baseUrl);
             */
+
+            #endregion
+
+            if (AppIsAlreadyRunning())
+            {
+                Console.WriteLine(AppName + " is already running! Exiting the application.");
+                return;
+            }
+
             FromPort(args);
         }
 
@@ -126,14 +142,22 @@ EndPort=CORP_END_PORT;
             
         }
 
-        public static void FromMock()
+        static bool AppIsAlreadyRunning()
+        {
+            Console.WriteLine($"Current app name: {AppName}");
+            bool createdNew;
+            _mutex = new Mutex(true, AppName, out createdNew);
+            return !createdNew;
+        }
+
+        static void FromMock()
         {
             var toastData = Test.Mock();
             ShowToast(toastData);
             Thread.Sleep(1000);
         }
 
-        public static void FromXml(ToastModel toast = null)
+        static void FromXml(ToastModel toast = null)
         {
             var toastData = toast ?? Test.MockXml();
             ShowToast(toastData);
