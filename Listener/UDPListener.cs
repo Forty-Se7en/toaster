@@ -48,15 +48,15 @@ namespace Listener
             {
                 while (true)
                 {
-                    Console.WriteLine($"StartListen at port {ListenPort}: Waiting for broadcast");
+                    Console.WriteLine($"StartListen: listening at port {ListenPort}: Waiting for broadcast");
                     byte[] bytes = _listener.Receive(ref _groupEP);
 
                     new Thread(() =>
                     {
-                        Console.WriteLine($"StartListen: Received broadcast from {_groupEP} : {bytes.Length} bytes");
                         Thread.CurrentThread.IsBackground = true;
                         Received(bytes);
                     }).Start(); 
+                    Console.WriteLine($"StartListen: Received broadcast from {_groupEP} : {bytes.Length} bytes");
                 }
             }
             catch (SocketException ex)
