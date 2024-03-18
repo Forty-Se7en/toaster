@@ -53,11 +53,10 @@ namespace Listener
 
                     new Thread(() =>
                     {
+                        Console.WriteLine($"StartListen: Received broadcast from {_groupEP} : {bytes.Length} bytes");
                         Thread.CurrentThread.IsBackground = true;
                         Received(bytes);
-                    }).Start();                    
-
-                    Console.WriteLine($"StartListen: Received broadcast from {_groupEP} : {bytes.Length} bytes");
+                    }).Start(); 
                 }
             }
             catch (SocketException ex)
